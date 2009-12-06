@@ -9,7 +9,7 @@
 -module(lstd_template_eqc).
 -include_lib("eqc/include/eqc.hrl").
 
--export([prop_string_empty_list/0]).
+-export([prop_string_empty_list/0, prop_tokens/0]).
 
 %% Generates the internal representation of a string with substitutions
 %% template() -> [{var, string()}, {text, string()}]
@@ -42,3 +42,7 @@ to_tokens_acc({text, S}) ->
 prop_string_empty_list() ->
     ?FORALL(S, ql_gen:string(), S =:= lstd_template:string(S, [])).
 
+prop_tokens() ->
+    ?FORALL(
+       T, template(),
+       to_tokens(T) == lstd_template:tokens(to_string(T))).
