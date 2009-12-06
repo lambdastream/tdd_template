@@ -12,5 +12,17 @@
 
 -export([string/2]).
 
+%% For tests
+-export([tokens/1]).
+
 string(String, _Subs) ->
     String.
+
+tokens([]) ->
+    [];
+tokens([$@ | T]) ->
+    [at | tokens(T)];
+tokens(S) ->
+    {String, T} = lists:split(string:cspan(S, "@"), S),
+    [{string, String} | tokens(T)].
+
