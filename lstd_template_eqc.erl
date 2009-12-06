@@ -12,14 +12,19 @@
 -export([prop_string_empty_list/0, prop_tokens/0]).
 
 %% Generates a non empty string
-non_empty_string() ->
-    ql_gen:non_empty_list(ql_gen:printable()).
+%% Any printable char but @
+valid_char() ->
+    ?SUCHTHAT(C, ql_gen:printable(), C =/= $@).
+
+%% Non-empty string without any @
+valid_string() ->
+    ql_gen:non_empty_list(valid_char()).
 
 %% Generates the internal representation of a string with substitutions
 %% template() -> [{var, string()}, {text, string()}]
 template() ->
     ?LET(
-       L, eqc_gen:list({eqc_gen:oneof([text, var]), non_empty_string()}),
+       L, eqc_gen:list({eqc_gen:oneof([text, var]), valid_string()}),
        fold_text(L)).
 
 %% Change sequences like [{text, "a"}, {text, "b"}] in [{text, "ab"}]
