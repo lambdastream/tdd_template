@@ -19,7 +19,7 @@ non_empty_string() ->
 %% template() -> [{var, string()}, {text, string()}]
 template() ->
     eqc_gen:list(
-      eqc_gen:oneof([{var, ql_gen:string()}, {text, non_empty_string()}])).
+      eqc_gen:oneof([{var, non_empty_string()}, {text, non_empty_string()}])).
 
 %% Returns the string form from the internal representation of a template
 to_string(Template) ->
