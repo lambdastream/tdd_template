@@ -11,11 +11,15 @@
 
 -export([prop_string_empty_list/0, prop_tokens/0]).
 
+%% Generates a non empty string
+non_empty_string() ->
+    ql_gen:non_empty_list(ql_gen:printable()).
+
 %% Generates the internal representation of a string with substitutions
 %% template() -> [{var, string()}, {text, string()}]
 template() ->
     eqc_gen:list(
-      eqc_gen:oneof([{var, ql_gen:string()}, {text, ql_gen:string()}])).
+      eqc_gen:oneof([{var, ql_gen:string()}, {text, non_empty_string()}])).
 
 %% Returns the string form from the internal representation of a template
 to_string(Template) ->
