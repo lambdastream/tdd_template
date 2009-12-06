@@ -18,8 +18,18 @@ non_empty_string() ->
 %% Generates the internal representation of a string with substitutions
 %% template() -> [{var, string()}, {text, string()}]
 template() ->
-    eqc_gen:list(
-      eqc_gen:oneof([{var, non_empty_string()}, {text, non_empty_string()}])).
+    ?LET(
+       L, eqc_gen:list({eqc_gen:oneof([text, var]), non_empty_string()}),
+       fold_text(L)).
+
+%% Change sequences like [{text, "a"}, {text, "b"}] in [{text, "ab"}]
+fold_text([{text, A}, {text, B} | T]) ->
+    fold_text([{text, A ++ B} | T]);
+fold_text([H | T]) ->
+    [H | fold_text(T)];
+fold_text([]) ->
+    [].
+
 
 %% Returns the string form from the internal representation of a template
 to_string(Template) ->
