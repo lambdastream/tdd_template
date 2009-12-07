@@ -9,7 +9,7 @@
 -module(lstd_template_eqc).
 -include_lib("eqc/include/eqc.hrl").
 
--export([prop_string_empty_list/0, prop_tokens/0, prop_parse/0]).
+-export([prop_string_empty_list/0, prop_tokens/0, prop_parse/0, prop_string/0]).
 
 %% Generates a non empty string
 %% Any printable char but @
@@ -69,11 +69,19 @@ to_parsed(Template) ->
 to_parsed_acc({var, Name, _Value}) -> {var, Name};
 to_parsed_acc({text, S}) -> {text, S}.
 
+%% Returns the expected result, after substituting variables by their values
 to_result(Template) ->
     lists:concat([to_result_acc(X) || X <- Template]).
 
 to_result_acc({var, _, S}) -> S;
 to_result_acc({text, S}) -> S.
+
+to_substs([]) ->
+    [];
+to_substs([{var, Name, Value} | T]) ->
+    [{Name, Value} | to_substs(T)];
+to_substs([{text, _} | T]) ->
+    to_substs(T).
 
 %% Test that no substitutions leave the string intact
 prop_string_empty_list() ->
@@ -88,3 +96,20 @@ prop_parse() ->
     ?FORALL(
        T, template(),
        to_parsed(T) == lstd_template:parse(lstd_template:tokens(to_string(T)))).
+
+prop_string() ->
+    ?FORALL(
+       T, template(),
+       ?LET(
+	  {Substs, String, Expected},
+	  {to_substs(T), to_string(T), to_result(T)},
+	  ?LET(
+	     Result, lstd_template:string(String, Substs),
+	     ?WHENFAIL(
+		io:format(
+		  "~nTemplate: ~p~n"
+		  "Substs  : ~p~n"
+		  "Expected: ~p~n"
+		  "Got     : ~p~n",
+		  [String, Substs, Expected, Result]),
+		Expected =:= Result)))).
