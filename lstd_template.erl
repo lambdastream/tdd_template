@@ -15,8 +15,16 @@
 %% For tests
 -export([tokens/1, parse/1]).
 
-string(String, _Subs) ->
-    String.
+string(String, Subs) ->
+    apply_subs(parse(tokens(String)), Subs).
+
+apply_subs(Parsed, Subs) ->
+    lists:concat([to_string(X, Subs) || X <- Parsed]).
+
+to_string({text, Text}, _Subs) ->
+    Text;
+to_string({var, Var}, Subs) ->
+    lstd_lists:keysearch(Var, Subs).
 
 tokens([]) ->
     [];
