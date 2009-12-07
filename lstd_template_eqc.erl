@@ -9,7 +9,7 @@
 -module(lstd_template_eqc).
 -include_lib("eqc/include/eqc.hrl").
 
--export([prop_string_empty_list/0, prop_tokens/0]).
+-export([prop_string_empty_list/0, prop_tokens/0, prop_parse/0]).
 
 %% Generates a non empty string
 %% Any printable char but @
@@ -65,3 +65,8 @@ prop_tokens() ->
     ?FORALL(
        T, template(),
        to_tokens(T) == lstd_template:tokens(to_string(T))).
+
+prop_parse() ->
+    ?FORALL(
+       T, template(),
+       T == lstd_template:parse(lstd_template:tokens(to_string(T)))).
