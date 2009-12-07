@@ -85,7 +85,14 @@ to_substs([{text, _} | T]) ->
 
 %% Test that no substitutions leave the string intact
 prop_string_empty_list() ->
-    ?FORALL(S, ql_gen:string(), S =:= lstd_template:string(S, [])).
+    ?FORALL(
+       S, ql_gen:string(),
+       try
+           S =:= lstd_template:string(S, [])
+       catch
+          Error:Reason ->
+               ?WHENFAIL(io:format("Error ~p:~p~n", [Error, Reason]), false)
+       end).
 
 prop_tokens() ->
     ?FORALL(
