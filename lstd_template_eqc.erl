@@ -21,7 +21,7 @@ valid_string() ->
     ql_gen:non_empty_list(valid_char()).
 
 %% Generates the internal representation of a string with substitutions
-%% template() -> [{var, string()}, {text, string()}]
+%% template() -> [{var, Variable::string(), Value::string()}, {text, string()}]
 template() ->
     ?LET(
        L, eqc_gen:list(eqc_gen:oneof([text(), var()])),
