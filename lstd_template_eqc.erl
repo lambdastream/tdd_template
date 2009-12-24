@@ -86,7 +86,7 @@ to_substs([{text, _} | T]) ->
 %% Test that no substitutions leave the string intact
 prop_string_empty_list() ->
     ?FORALL(
-       S, ql_gen:string(),
+       S, valid_string(),
        try
            S =:= lstd_template:string(S, [])
        catch
