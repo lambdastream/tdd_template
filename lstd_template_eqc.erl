@@ -28,7 +28,9 @@ template() ->
        fold_text(L)).
 
 text() ->
-    {text, valid_string()}.
+    eqc_gen:frequency(
+      [{5, {text, valid_string()}},
+       {1, escaped_at}]).
 
 var() ->
     {var, valid_string(), ql_gen:string()}.
@@ -48,6 +50,8 @@ to_string(Template) ->
 
 to_string_acc([]) ->
     [];
+to_string_acc([escaped_at | T]) ->
+    ["@@"| to_string_acc(T)];
 to_string_acc([{var, V, _}| T]) ->
     [lstd_string:format("@~s@", [V])| to_string_acc(T)];
 to_string_acc([{text, S}| T]) ->
@@ -60,6 +64,8 @@ to_tokens(Template) ->
 
 to_tokens_acc({var, S, _}) ->
     [at, {string, S}, at];
+to_tokens_acc(escaped_at) ->
+    [at, at];
 to_tokens_acc({text, S}) ->
     [{string, S}].
 
@@ -67,6 +73,7 @@ to_parsed(Template) ->
     [to_parsed_acc(X) || X <- Template].
 
 to_parsed_acc({var, Name, _Value}) -> {var, Name};
+to_parsed_acc(escaped_at) -> {text, "@"};
 to_parsed_acc({text, S}) -> {text, S}.
 
 %% Returns the expected result, after substituting variables by their values
@@ -74,10 +81,13 @@ to_result(Template) ->
     lists:concat([to_result_acc(X) || X <- Template]).
 
 to_result_acc({var, _, S}) -> S;
+to_result_acc(escaped_at) -> "@";
 to_result_acc({text, S}) -> S.
 
 to_substs([]) ->
     [];
+to_substs([escaped_at | T]) ->
+    to_substs(T);
 to_substs([{var, Name, Value} | T]) ->
     [{Name, Value} | to_substs(T)];
 to_substs([{text, _} | T]) ->
