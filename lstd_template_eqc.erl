@@ -46,16 +46,14 @@ fold_text([]) ->
 
 %% Returns the string form from the internal representation of a template
 to_string(Template) ->
-    lists:concat(to_string_acc(Template)).
+    lists:concat([to_string_acc(X) || X <- Template]).
 
-to_string_acc([]) ->
-    [];
-to_string_acc([escaped_at | T]) ->
-    ["@@"| to_string_acc(T)];
-to_string_acc([{var, V, _}| T]) ->
-    [lstd_string:format("@~s@", [V])| to_string_acc(T)];
-to_string_acc([{text, S}| T]) ->
-    [S| to_string_acc(T)].
+to_string_acc(escaped_at) ->
+    "@@";
+to_string_acc({var, V, _}) ->
+    lstd_string:format("@~s@", [V]);
+to_string_acc({text, S}) ->
+    S.
 
 %% Returns the expected token list from the internal representation of a
 %% template
