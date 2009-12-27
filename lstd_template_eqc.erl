@@ -24,8 +24,17 @@ valid_string() ->
 %% template() -> [{var, Variable::string(), Value::string()}, {text, string()}]
 template() ->
     ?LET(
-       {Text, Vars}, {eqc_gen:list(text()), var_list()},
-       fold_text(Text ++ Vars)).
+       {Text, VarList}, {eqc_gen:list(text()), var_list()},
+       ?LET(
+          RepeatedVars, repeated_vars(VarList),
+          ?LET(
+             Template, ql_gen:permutation(Text ++ VarList ++ RepeatedVars),
+             fold_text(Template)))).
+
+repeated_vars([]) ->
+    [];
+repeated_vars(VarList) ->
+    eqc_gen:list(eqc_gen:elements(VarList)).
 
 text() ->
     eqc_gen:frequency(
