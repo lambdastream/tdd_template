@@ -24,8 +24,8 @@ valid_string() ->
 %% template() -> [{var, Variable::string(), Value::string()}, {text, string()}]
 template() ->
     ?LET(
-       L, eqc_gen:list(eqc_gen:oneof([text(), var()])),
-       fold_text(L)).
+       {Text, Vars}, {eqc_gen:list(text()), var_list()},
+       fold_text(Text ++ Vars)).
 
 text() ->
     eqc_gen:frequency(
@@ -41,6 +41,13 @@ var_name() ->
     eqc_gen:frequency(
       [{1, valid_string()},
        {5, eqc_gen:vector(2, eqc_gen:elements(lists:seq($a, $d)))}]).
+
+%% Generate a list of variables without duplicated keys
+var_list() ->
+    ?LET(L, eqc_gen:list(var()), remove_duplicated_keys(L)).
+
+remove_duplicated_keys(L) ->
+    L.
 
 %% Change sequences like [{text, "a"}, {text, "b"}] in [{text, "ab"}]
 fold_text([{text, A}, {text, B} | T]) ->
