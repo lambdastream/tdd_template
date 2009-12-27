@@ -35,6 +35,14 @@ text() ->
 var() ->
     {var, valid_string(), ql_gen:string()}.
 
+%% Make it easy to generate duplicated names, but also try with wicked, weird
+%% strings
+var_name() ->
+    eqc_gen:frequency(
+      [{1, valid_string()},
+       {50, "a"},
+       {5, eqc_gen:vector(3, eqc_gen:elements(lists:seq($a, $f)))}]).
+
 %% Change sequences like [{text, "a"}, {text, "b"}] in [{text, "ab"}]
 fold_text([{text, A}, {text, B} | T]) ->
     fold_text([{text, A ++ B} | T]);

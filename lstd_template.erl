@@ -37,7 +37,7 @@ tokens(S) ->
 parse(Tokens) ->
     parse(Tokens, text).
 
-parse([at, at| T], Terminal) ->
+parse([at, at| T], Terminal = text) ->
     [{text, "@"} | parse(T, Terminal)];
 parse([at| T], Terminal) ->
     parse(T, switch_terminal(Terminal));
