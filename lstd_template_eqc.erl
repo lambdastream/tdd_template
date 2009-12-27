@@ -31,15 +31,14 @@ template() ->
              Template, ql_gen:permutation(Text ++ VarList ++ RepeatedVars),
              fold_text(Template)))).
 
-repeated_vars([]) ->
-    [];
-repeated_vars(VarList) ->
-    eqc_gen:list(eqc_gen:elements(VarList)).
-
 text() ->
     eqc_gen:frequency(
       [{5, {text, valid_string()}},
        {1, escaped_at}]).
+
+%% Generate a list of variables without duplicated keys
+var_list() ->
+    ?LET(L, eqc_gen:list(var()), remove_duplicated_keys(L)).
 
 var() ->
     {var, var_name(), ql_gen:string()}.
@@ -51,10 +50,6 @@ var_name() ->
       [{1, valid_string()},
        {5, eqc_gen:vector(2, eqc_gen:elements(lists:seq($a, $d)))}]).
 
-%% Generate a list of variables without duplicated keys
-var_list() ->
-    ?LET(L, eqc_gen:list(var()), remove_duplicated_keys(L)).
-
 remove_duplicated_keys([]) ->
     [];
 remove_duplicated_keys([H = {var, Name, _} | T]) ->
@@ -64,6 +59,11 @@ remove_duplicated_keys([H = {var, Name, _} | T]) ->
         false ->
             [H | remove_duplicated_keys(T)]
     end.
+
+repeated_vars([]) ->
+    [];
+repeated_vars(VarList) ->
+    eqc_gen:list(eqc_gen:elements(VarList)).
 
 %% Change sequences like [{text, "a"}, {text, "b"}] in [{text, "ab"}]
 fold_text([{text, A}, {text, B} | T]) ->
