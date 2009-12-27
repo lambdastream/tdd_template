@@ -144,15 +144,17 @@ prop_string() ->
     ?FORALL(
        T, template(),
        ?LET(
-	  {Substs, String, Expected},
+	  {OrderedSubsts, String, Expected},
 	  {to_substs(T), to_string(T), to_result(T)},
-	  ?LET(
-	     Result, lstd_template:string(String, Substs),
-	     ?WHENFAIL(
-		io:format(
-		  "~nTemplate: ~p~n"
-		  "Substs  : ~p~n"
-		  "Expected: ~p~n"
-		  "Got     : ~p~n",
-		  [String, Substs, Expected, Result]),
-		Expected =:= Result)))).
+          ?FORALL(
+             Substs, ql_gen:permutation(OrderedSubsts),
+             ?LET(
+                Result, lstd_template:string(String, Substs),
+                ?WHENFAIL(
+                   io:format(
+                     "~nTemplate: ~p~n"
+                     "Substs  : ~p~n"
+                     "Expected: ~p~n"
+                     "Got     : ~p~n",
+                     [String, Substs, Expected, Result]),
+                   Expected =:= Result))))).
