@@ -107,14 +107,17 @@ to_result_acc({var, _, S}) -> S;
 to_result_acc(escaped_at) -> "@";
 to_result_acc({text, S}) -> S.
 
-to_substs([]) ->
+to_substs(T) ->
+    lstd_lists:remove_duplicates(to_substs_acc(T)).
+
+to_substs_acc([]) ->
     [];
-to_substs([escaped_at | T]) ->
-    to_substs(T);
-to_substs([{var, Name, Value} | T]) ->
-    [{Name, Value} | to_substs(T)];
-to_substs([{text, _} | T]) ->
-    to_substs(T).
+to_substs_acc([escaped_at | T]) ->
+    to_substs_acc(T);
+to_substs_acc([{var, Name, Value} | T]) ->
+    [{Name, Value} | to_substs_acc(T)];
+to_substs_acc([{text, _} | T]) ->
+    to_substs_acc(T).
 
 %% Test that no substitutions leave the string intact
 prop_string_empty_list() ->
