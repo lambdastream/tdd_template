@@ -41,15 +41,10 @@ var_list() ->
     ?LET(L, eqc_gen:list(var()), remove_duplicated_keys(L)).
 
 var() ->
-    {var, var_name(), ql_gen:string()}.
+    {var, valid_string(), ql_gen:string()}.
 
-%% Make it easy to generate duplicated names, but also try with wicked, weird
-%% strings
-var_name() ->
-    eqc_gen:frequency(
-      [{1, valid_string()},
-       {5, eqc_gen:vector(2, eqc_gen:elements(lists:seq($a, $d)))}]).
-
+%% In the unlikely event that we generate two substitutions with the same
+%% variable name, filter the first out
 remove_duplicated_keys([]) ->
     [];
 remove_duplicated_keys([H = {var, Name, _} | T]) ->
