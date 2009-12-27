@@ -46,8 +46,15 @@ var_name() ->
 var_list() ->
     ?LET(L, eqc_gen:list(var()), remove_duplicated_keys(L)).
 
-remove_duplicated_keys(L) ->
-    L.
+remove_duplicated_keys([]) ->
+    [];
+remove_duplicated_keys([H = {var, Name, _} | T]) ->
+    case lists:keymember(Name, 2, T) of
+        true ->
+            remove_duplicated_keys(T);
+        false ->
+            [H | remove_duplicated_keys(T)]
+    end.
 
 %% Change sequences like [{text, "a"}, {text, "b"}] in [{text, "ab"}]
 fold_text([{text, A}, {text, B} | T]) ->
